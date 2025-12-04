@@ -9,18 +9,28 @@ import StatsDashboard from '@/components/admin/StatsDashboard';
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('exercises');
   const [selectedExercise, setSelectedExercise] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Thêm trạng thái xác thực
   const router = useRouter();
 
-  // Check authentication
+  // Kiểm tra xác thực VÀ đảm bảo code chạy trên Client
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem('adminAuthenticated') === 'true';
-    if (!isAuthenticated) {
-      router.push('/admin/login');
+    // CHỈ CHẠY CODE NÀY TRÊN BROWSER
+    if (typeof window !== 'undefined') { 
+      const authStatus = localStorage.getItem('adminAuthenticated') === 'true';
+      setIsAuthenticated(authStatus);
+
+      if (!authStatus) {
+        // Chuyển hướng nếu chưa đăng nhập
+        router.push('/admin/login');
+      }
     }
   }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('adminAuthenticated');
+    // CHỈ CHẠY CODE NÀY TRÊN BROWSER
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('adminAuthenticated');
+    }
     router.push('/admin/login');
   };
 
@@ -34,6 +44,15 @@ export default function AdminDashboard() {
     setActiveTab('edit');
   };
 
+  // Hiển thị trạng thái Loading hoặc không gì cả nếu chưa xác thực
+  // Điều này ngăn việc render nội dung trang khi code vẫn đang chạy trên Server
+  if (!isAuthenticated && typeof window !== 'undefined') {
+     return <div className="flex justify-center items-center h-screen text-lg">Đang kiểm tra xác thực...</div>;
+  }
+  
+  // Nếu đang ở Server (prerender) hoặc đã xác thực, hiển thị nội dung
+  // LƯU Ý: Nếu bạn đã chuyển sang dùng Cookie/JWT (như tôi khuyến nghị trước), logic này phải được chạy ở Server Component
+  
   return (
     <AdminLayout onLogout={handleLogout}>
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
