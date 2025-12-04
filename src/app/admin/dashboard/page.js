@@ -1,4 +1,10 @@
 "use client";
+// Bổ sung các lệnh export để buộc Next.js render trang này một cách động.
+// Điều này ngăn chặn quá trình prerendering (Static Generation) trên Server, 
+// nơi gây ra lỗi ReferenceError: localStorage is not defined.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0; // Vô hiệu hóa cache cho trang này (tùy chọn nhưng an toàn)
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminLayout from '@/components/admin/AdminLayout';
